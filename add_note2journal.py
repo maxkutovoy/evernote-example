@@ -59,8 +59,6 @@ if __name__ == '__main__':
         'date': day.isoformat(),
         'dow': WEEK_DAYS[day.isoweekday()],
     }
-    print('Title Context is:')
-    print(json.dumps(context, ensure_ascii=False, indent=4))
 
     new_note = noteStore.copyNote(config.JOURNAL_TEMPLATE_NOTE_GUID, config.JOURNAL_NOTEBOOK_GUID)
     utitle_without_comment = new_note.title.split('#', 1)[0]
@@ -76,6 +74,6 @@ if __name__ == '__main__':
 
     noteStore.updateNote(new_note)
     
-    print(f'Note created: {utitle}')
+    print(f'Note title: "{utitle}"')
     print(f'Note text: "{text}"')
-    print('Done')
+    print('Note created')
