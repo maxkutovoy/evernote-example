@@ -40,7 +40,6 @@ if __name__ == '__main__':
     parser.add_argument('--notebook_id',
                         nargs='?',
                         type=str,
-                        default=config.INBOX_NOTEBOOK_GUID,
                         help='Notebook ID for dump notes')
     args = parser.parse_args()
 
@@ -50,14 +49,15 @@ if __name__ == '__main__':
     )
     note_store = client.get_note_store()
 
-    notes = get_notebook_list(note_store, config.INBOX_NOTEBOOK_GUID, args.number).notes
+    notebook_id = args.notebook_id or config.JOURNAL_NOTEBOOK_GUID
 
-    # print('Notes', notes)
+    notes = get_notebook_list(note_store, notebook_id, args.number).notes
     
     for counter, note in enumerate(notes, start=1):
         print(f'\n--------- {counter} ---------')
         print(f'Note id: {note.guid}')
         print(f'Note title: {note.title}')
+
         content = note_store.getNoteContent(note.guid)  # kwargs will be skipped by api because of bug
         soup = BeautifulSoup(content, "html.parser")
-        print(soup.get_text())
+        print(f'Note title: {soup.get_text()}')
