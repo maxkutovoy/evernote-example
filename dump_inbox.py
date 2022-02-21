@@ -29,19 +29,24 @@ def get_notebook_list(note_store, notebook_guid, number=10, offset=0):
 
 
 if __name__ == '__main__':
+    config = Settings()
+
     parser = argparse.ArgumentParser(description=u'Dumps notes from Evernote inbox to console')
-    parser.add_argument('number',
+    parser.add_argument('--number',
                         nargs='?',
                         type=int,
                         default=10,
                         help='number of records to dump')
+    parser.add_argument('--notebook_id',
+                        nargs='?',
+                        type=str,
+                        default=config.INBOX_NOTEBOOK_GUID,
+                        help='Notebook ID for dump notes')
     args = parser.parse_args()
-
-    config = Settings()
 
     client = EvernoteClient(
         token=config.EVERNOTE_PERSONAL_TOKEN,
-        sandbox=False
+        sandbox=config.SANDBOX
     )
     note_store = client.get_note_store()
 
@@ -50,7 +55,9 @@ if __name__ == '__main__':
     # print('Notes', notes)
     
     for counter, note in enumerate(notes, start=1):
-        print('\n--------- %s ---------' % counter)
+        print(f'\n--------- {counter} ---------')
+        print(f'Note id: {note.guid}')
+        print(f'Note title: {note.title}')
         content = note_store.getNoteContent(note.guid)  # kwargs will be skipped by api because of bug
         soup = BeautifulSoup(content, "html.parser")
         print(soup.get_text())
