@@ -31,18 +31,26 @@ def is_valid_date(text):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=u'Adds note to notebook "Дневник", uses template note')
-    parser.add_argument('date',
-                        nargs='?',
-                        type=is_valid_date,
-                        help='date in format "YYYY-MM-DD"')
+    parser = argparse.ArgumentParser(description='Adds note to notebook "Дневник", uses template note')
+    parser.add_argument(
+        '--date',
+        nargs='?',
+        type=is_valid_date,
+        help='date in format "YYYY-MM-DD"'
+    )
+    parser.add_argument(
+        '--text',
+        '-t',
+        type=str,
+        help='Note text'
+    )
     args = parser.parse_args()
 
     config = Settings()
 
     client = EvernoteClient(
         token=config.EVERNOTE_PERSONAL_TOKEN,
-        sandbox=False # Default: True
+        sandbox=config.SANDBOX
     )
     noteStore = client.get_note_store()
 
@@ -55,10 +63,19 @@ if __name__ == '__main__':
     print(json.dumps(context, ensure_ascii=False, indent=4))
 
     new_note = noteStore.copyNote(config.JOURNAL_TEMPLATE_NOTE_GUID, config.JOURNAL_NOTEBOOK_GUID)
-    utitle_without_comment = new_note.title.decode('utf8').split('#', 1)[0]
+    utitle_without_comment = new_note.title.split('#', 1)[0]
     utitle = utitle_without_comment.strip().format(**context)
-    new_note.title = utitle.encode('utf8')
+    new_note.title = utitle
+
+    text = args.text
+    new_note.content = '<?xml version="1.0" encoding="UTF-8"?>'
+    new_note.content += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
+    new_note.content += '<en-note>'
+    new_note.content += f'<div>{text}</div>'
+    new_note.content += '</en-note>'
+
     noteStore.updateNote(new_note)
     
-    print(u'Note created: %s' % utitle)
+    print(f'Note created: {utitle}')
+    print(f'Note text: "{text}"')
     print('Done')
